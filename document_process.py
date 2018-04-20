@@ -46,7 +46,7 @@ data structure
 
 from poter_stemming import PorterStemmer
 
-REFERENCE_PATH = 'doc/reference/'
+REFERENCE_PATH = '..'
 STOP_WORD_LIST = 'stop-word-list.csv'
 
 '''
