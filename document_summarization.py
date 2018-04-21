@@ -51,20 +51,6 @@ NOTE that the sentences must in one document
 '''
 
 
-def tf(sentences: list):
-    # split into words and count. the word would be included
-    # in dictionary count_words only if the length of the word is
-    # bigger than 1 as well as it is unique in words
-    count_word = {}
-    tf_word = {}
-    sum_count_words = 0
-    for count_w in count_word.keys():
-        sum_count_words += count_word[count_w]
-    for w in count_word.keys():
-        tf_word[w] = count_word[w] / sum_count_words
-    return tf_word, count_word
-
-
 '''
 the main method of the TF-IDF algorithm
 '''

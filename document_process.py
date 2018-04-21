@@ -43,7 +43,6 @@ data structure
    docn] [ ... , senm]
 
 """
-import numpy as np
 
 from poter_stemming import PorterStemmer
 
@@ -260,7 +259,6 @@ class DocProcess:
         else:
             return -1
 
-
     # count how many docs contain the word
     def count_doc_containing_word(self, word):
         if word in self.word_counter.cntr.keys():
@@ -283,10 +281,10 @@ class DocProcess:
         return self.processed_doc[doc_index].__len__()
 
     def sen_size_total(self):
-        sum = 0
+        s = 0
         for doc_idx in range(self.doc_size()):
-            sum += self.sen_size(doc_idx)
-        return sum
+            s += self.sen_size(doc_idx)
+        return s
 
     # count how many word there is in the processed sen,
     # in this case, we do not care if some word repeats
