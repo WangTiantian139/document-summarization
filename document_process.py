@@ -242,6 +242,25 @@ class DocProcess:
         else:
             return -1
 
+    # count how many sentences contain the word
+    def count_sen_containing_word(self, word):
+        if word in self.word_counter.cntr.keys():
+            count = 0
+            for doc_idx in range(self.doc_size()):
+                # if the word was contained by the sen,
+                # the value should greater than 0
+                dual_l = self.word_counter.cntr[word]
+                for l in dual_l:
+                    for s in l:
+                        if s:
+                            count += 1
+                        else:
+                            continue
+            return count
+        else:
+            return -1
+
+
     # count how many docs contain the word
     def count_doc_containing_word(self, word):
         if word in self.word_counter.cntr.keys():
@@ -269,9 +288,17 @@ class DocProcess:
             sum += self.sen_size(doc_idx)
         return sum
 
+    # count how many word there is in the processed sen,
+    # in this case, we do not care if some word repeats
+    def sen_word_size(self, doc_index, sen_index):
+        s = 0
+        for word in self.word_list:
+            s += self.word_counter.cntr[word][doc_index][sen_index]
+        return s
+
     # count how many word there is in the processed doc,
     # in this case, we do not care if some word repeats
-    def word_size(self, doc_index):
+    def doc_word_size(self, doc_index):
         s = 0
         for word in self.word_list:
             l = self.word_counter.cntr[word][doc_index]

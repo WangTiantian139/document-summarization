@@ -79,20 +79,20 @@ def tf_idf(data: DocProcess):
     general_sen_idx = 0
     for doc_idx in range(data.doc_size()):
         # the number of all of words in a certain doc
-        wrd_sz_doc = data.word_size(doc_idx)
         for sen_idx in range(data.sen_size(doc_idx)):
+            wrd_sz_sen = data.sen_word_size(doc_idx, sen_idx)
             for word in data.word_list:
                 # the number of how many times the word appears
-                # in a certain doc
-                count = data.count_in_doc(word, doc_idx)
+                # in a certain sentence
+                count = data.count_in_sen(word, doc_idx, sen_idx)
                 # many of 0 cases, skip for the matrix has been initialized with 0
                 if count == 0:
                     continue
                 elif count > 0:
-                    tf = count / wrd_sz_doc
+                    tf = count / wrd_sz_sen
                     # log makes the idf value too small, so try to remove it
-                    idf = math.log(data.doc_size() / (
-                            data.count_doc_containing_word(word) + 1))
+                    idf = math.log(data.sen_size(doc_idx) / (
+                            data.count_sen_containing_word(word) + 1))
                     # the word index related to word list in data
                     wrd_idx = data.word_list.index(word)
                     s_w_matrix[general_sen_idx, wrd_idx] = tf * idf
@@ -122,7 +122,7 @@ cosine similarity algorithm
 def cos_similarity(sentence1: np.ndarray, sentence2: np.ndarray):
     sen1_pro_sen2 = sentence1.dot(sentence2)
     amp_sen1, amp_sen2 = np.linalg.norm(sentence1), np.linalg.norm(sentence2)
-    return np.cos(sen1_pro_sen2 / (amp_sen1 * amp_sen2))
+    return sen1_pro_sen2 / (amp_sen1 * amp_sen2 + 1e-9)
 
 
 def write_for_test(m: np.ndarray, v: np.ndarray):
@@ -156,8 +156,12 @@ def summarize(doc_path: str, doc_list: tuple):
         sim_lst.append((cosine, r))
     # sort by big2small order
     sim_lst.sort(reverse=True)
+
+    # there are some 0-based row, which are bugs
     base_rank = 0
-    current_rank = 1
+    while sim_lst[base_rank][0] == 1:
+        base_rank += 1
+    current_rank = base_rank + 1
     summary = [data.abstract(sim_lst[base_rank][1])]
     sum_size = summary[-1].__len__()
     while current_rank != sim_lst.__len__():
@@ -168,7 +172,7 @@ def summarize(doc_path: str, doc_list: tuple):
         # compare 2 sentences
         sim = cos_similarity(s_w_matrix[sim_lst[current_rank][1]]
                              , s_w_matrix[sim_lst[base_rank][1]])
-        if sim < 0.539:
+        if sim < 0.6:
             summary.append(data.abstract(sim_lst[current_rank][1]))
             base_rank = current_rank
             current_rank = base_rank + 1
