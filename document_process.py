@@ -43,10 +43,11 @@ data structure
    docn] [ ... , senm]
 
 """
+import numpy as np
 
 from poter_stemming import PorterStemmer
 
-REFERENCE_PATH = '..'
+REFERENCE_PATH = ''
 STOP_WORD_LIST = 'stop-word-list.csv'
 
 '''
@@ -213,44 +214,46 @@ class DocProcess:
                         self.word_counter.cntr[w][doc_idx][sen_idx] += 1
                 sen_idx += 1
             doc_idx += 1
-        self.word_list = self.word_counter.cntr.keys()
+        self.word_list = list(self.word_counter.cntr.keys())
 
+    # count how many times the word appears in the sentence
     def count_in_sen(self, word, doc_index, sen_index):
         if word in self.word_counter.cntr.keys():
             return self.word_counter.cntr[word][doc_index][sen_index]
         else:
             return -1
 
+    # count how many times the word appears in the doc[doc_index]
     def count_in_doc(self, word, doc_index):
         if word in self.word_counter.cntr.keys():
-            sum_count = 0
-            for sen_idx in range(self.processed_doc[doc_index].__len__()):
-                sum_count += self.word_counter.cntr[word][doc_index][sen_idx]
+            sum_count = sum(list(self.word_counter.cntr[word][doc_index]))
             return sum_count
         else:
             return -1
 
-    def count_total(self, word):
+    # count how many times the word appears in all docs
+    def count_total_in_doc(self, word):
         if word in self.word_counter.cntr.keys():
-            counter = 0
-            for doc_idx in range(self.processed_doc.__len__()):
-                counter += self.count_in_doc(word, doc_idx)
-            return counter
+            s = 0
+            dual_l = self.word_counter.cntr[word]
+            for l in dual_l:
+                s += sum(l)
+            return s
         else:
             return -1
 
-    # count how many docs containing the word
-    def count_doc(self, word):
+    # count how many docs contain the word
+    def count_doc_containing_word(self, word):
         if word in self.word_counter.cntr.keys():
-            counter = 0
+            count = 0
             for doc_idx in range(self.doc_size()):
-                for sen_idx in range(self.sen_size(doc_idx)):
-                    if self.count_in_sen(word, doc_idx, sen_idx):
-                        counter += 1
-                        break
-                    else:
-                        continue
-            return counter
+                # if the word was contained by the doc, there must be some sentence
+                # contain the word. therefore the sum should greater than 0
+                if sum(list(self.word_counter.cntr[word][doc_idx])):
+                    count += 1
+                else:
+                    continue
+            return count
         else:
             return -1
 
@@ -266,22 +269,21 @@ class DocProcess:
             sum += self.sen_size(doc_idx)
         return sum
 
+    # count how many word there is in the processed doc,
+    # in this case, we do not care if some word repeats
     def word_size(self, doc_index):
-        sum = 0
-        for sen in self.processed_doc[doc_index]:
-            counter_in_sen = count_word(sen)
-            for v in counter_in_sen.values():
-                sum += v
-        return sum
+        s = 0
+        for word in self.word_list:
+            l = self.word_counter.cntr[word][doc_index]
+            s += sum(list(l))
+        return s
 
+    # count how many word there is in all of the processed docs
     def word_size_total(self):
-        sum = 0
-        for doc_index in range(self.doc_size()):
-            for sen in self.processed_doc[doc_index]:
-                counter_in_sen = count_word(sen)
-                for v in counter_in_sen.values():
-                    sum += v
-        return sum
+        s = 0
+        for word in self.word_list:
+            s += self.count_total_in_doc(word)
+        return s
 
     def abstract(self, sen_rank):
         for doc in self.ori_doc:
@@ -346,14 +348,14 @@ if __name__ == "__main__":
     DOC_PATH = 'doc/unprocessed_data/d30045t/'
     DOCUMENTS = ('NYT19981125.0417',
                  'NYT19981125.0433',
-                 'NYT19981126.0192',
-                 'NYT19981127.0203',
-                 'NYT19981127.0240',
-                 'NYT19981127.0256',
-                 'NYT19981127.0264',
-                 'NYT19981127.0289',
-                 'NYT19981127.0293',
-                 'NYT19981129.0113',
+                 # 'NYT19981126.0192',
+                 # 'NYT19981127.0203',
+                 # 'NYT19981127.0240',
+                 # 'NYT19981127.0256',
+                 # 'NYT19981127.0264',
+                 # 'NYT19981127.0289',
+                 # 'NYT19981127.0293',
+                 # 'NYT19981129.0113',
                  )
     doc = DocProcess(DOC_PATH, DOCUMENTS)
     doc6 = doc.ori_doc[6]

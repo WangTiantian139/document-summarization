@@ -23,11 +23,9 @@ formula:
 
 """
 
-
 import math
 import numpy as np
 from document_process import DocProcess
-
 
 DOC_PATH = 'doc/unprocessed_data/d30045t/'
 REFERENCE_PATH = 'doc/reference/'
@@ -43,8 +41,6 @@ DOCUMENTS = ('NYT19981125.0417',
              'NYT19981129.0113',
              )
 STOP_WORD_LIST = 'stop-word-list.csv'
-
-
 
 '''
 input stemmed sentences in just one document
@@ -76,17 +72,15 @@ the main method of the TF-IDF algorithm
 
 def tf_idf(data: DocProcess):
     # a sentence-word (row as sentence) matrix, whose element is TF-IDF value
-    s_w_matrix = np.zeros((data.sen_size_total(), data.word_size_total()))
+    s_w_matrix = np.zeros((data.sen_size_total(), data.word_list.__len__()))
 
     # transverse every sentence
     # the sentence index in multi-doc scope
     general_sen_idx = 0
     for doc_idx in range(data.doc_size()):
         # the number of all of words in a certain doc
-        wrd_sz_total = data.word_size(doc_idx)
+        wrd_sz_doc = data.word_size(doc_idx)
         for sen_idx in range(data.sen_size(doc_idx)):
-            # the word index related to word list in data
-            wrd_idx = 0
             for word in data.word_list:
                 # the number of how many times the word appears
                 # in a certain doc
@@ -95,21 +89,25 @@ def tf_idf(data: DocProcess):
                 if count == 0:
                     continue
                 elif count > 0:
-                    tf = count / wrd_sz_total
-                    idf = math.log(data.doc_size() / (data.count_doc(word) + 1), 10)
+                    tf = count / wrd_sz_doc
+                    # log makes the idf value too small, so try to remove it
+                    idf = math.log(data.doc_size() / (
+                            data.count_doc_containing_word(word) + 1))
+                    # the word index related to word list in data
+                    wrd_idx = data.word_list.index(word)
                     s_w_matrix[general_sen_idx, wrd_idx] = tf * idf
                 elif count == -1:
-                    print('error. no such word', word)
+                    print('error. no such word ', word)
                 else:
                     print('error. counter error.')
-                wrd_idx += 1
             general_sen_idx += 1
+        print('doc ', doc_idx, ' completed.')
     # regard all sentences in docs as a long one,
     # and compute its TF-IDF value
     long_sen_vector = []
     word_size_total = data.word_size_total()
     for word in data.word_list:
-        tf = data.count_total(word) / word_size_total
+        tf = data.count_total_in_doc(word) / word_size_total
         idf = math.log(1 / (1 + 1))
         long_sen_vector.append(tf * idf)
 
@@ -122,37 +120,59 @@ cosine similarity algorithm
 
 
 def cos_similarity(sentence1: np.ndarray, sentence2: np.ndarray):
-    sen1_pro_sen2 = np.transpose(sentence1) * sentence2
-    amp_sen1, amp_sen2 = np.fabs(sentence1), np.fabs(sentence2)
+    sen1_pro_sen2 = sentence1.dot(sentence2)
+    amp_sen1, amp_sen2 = np.linalg.norm(sentence1), np.linalg.norm(sentence2)
     return np.cos(sen1_pro_sen2 / (amp_sen1 * amp_sen2))
+
+
+def write_for_test(m: np.ndarray, v: np.ndarray):
+    # create file and write arrays separated by space to the file
+    m.tofile('sentence-to-word-matrix.cache', ' ', '%.5f')
+    v.tofile('long-sentence-vector.cache', ' ', '%.5f')
+
+
+def read_for_test():
+    infile = open('sentence-to-word-matrix.cache', 'r')
+    matrix = infile.read()
+    infile.close()
+    infile = open('long-sen-vector.cache', 'r')
+    vector = infile.read()
+    infile.close()
+    return np.array(matrix), np.array(vector)
 
 
 def summarize(doc_path: str, doc_list: tuple):
     data = DocProcess(doc_path, doc_list)
     s_w_matrix, long_sen_vector = tf_idf(data)
+    # save the sentence to word matrix and read it for saving time
+    write_for_test(s_w_matrix, long_sen_vector)
+    # s_w_matrix, long_sen_vector = read_for_test()
     # a list of cos similarity, whose element is a tuple of
     # cosine value and original sentence's rank in sentence-word
     # matrix
-    cos_sim_lst = []
-    for r in range(np.size(s_w_matrix, 0)):
+    sim_lst = []
+    for r in range(s_w_matrix.shape[0]):
         cosine = cos_similarity(s_w_matrix[r], long_sen_vector)
-        cos_sim_lst.append((cosine, r))
-    cos_sim_lst.sort()
-    check_rank = 0
+        sim_lst.append((cosine, r))
+    # sort by big2small order
+    sim_lst.sort(reverse=True)
+    base_rank = 0
     current_rank = 1
-    summary = [data.abstract(cos_sim_lst[check_rank][1])]
-    while current_rank != np.size(s_w_matrix, 0):
-        if summary.__sizeof__() >= 665:
+    summary = [data.abstract(sim_lst[base_rank][1])]
+    sum_size = summary[-1].__len__()
+    while current_rank != sim_lst.__len__():
+        if sum_size >= 665:
             break
         else:
             pass
         # compare 2 sentences
-        cmp = cos_similarity(s_w_matrix[cos_sim_lst[current_rank][1]]
-                             , s_w_matrix[cos_sim_lst[check_rank][1]])
-        if cmp < 0.3:
-            summary.append(data.abstract(cos_sim_lst[current_rank][1]))
-            check_rank = current_rank
-            current_rank = check_rank + 1
+        sim = cos_similarity(s_w_matrix[sim_lst[current_rank][1]]
+                             , s_w_matrix[sim_lst[base_rank][1]])
+        if sim < 0.539:
+            summary.append(data.abstract(sim_lst[current_rank][1]))
+            base_rank = current_rank
+            current_rank = base_rank + 1
+            sum_size += summary[-1].__len__()
         else:
             current_rank += 1
     return summary
