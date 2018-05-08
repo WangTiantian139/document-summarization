@@ -26,6 +26,7 @@ formula:
 import math
 import numpy as np
 from document_process import DocProcess
+import convert_format_pyrouge as cfp
 
 DOC_PATH = 'doc/unprocessed_data/d30045t/'
 REFERENCE_PATH = 'doc/reference/'
@@ -158,7 +159,8 @@ def summarize(doc_path: str, doc_list: tuple):
         # compare 2 sentences
         sim = cos_similarity(s_w_matrix[sim_lst[current_rank][1]]
                              , s_w_matrix[sim_lst[base_rank][1]])
-        if sim < 0.6:
+        # change the coefficient to change the summarization all by mind
+        if sim < 0.7:
             summary.append(data.abstract(sim_lst[current_rank][1]))
             base_rank = current_rank
             current_rank = base_rank + 1
@@ -176,3 +178,8 @@ if __name__ == '__main__':
     summary = summarize(doc_path=DOC_PATH,
                         doc_list=DOCUMENTS)
     print(summary)
+    outfile = open('doc/systems/04systems/D30045.M.100.T.TT', 'w')
+    for sentence in summary:
+        outfile.write(sentence + '.\n')
+    outfile.close()
+    cfp.convert2rouge_format()

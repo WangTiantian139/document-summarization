@@ -1,0 +1,41 @@
+<ROUGE-EVAL version="1.0">
+    <EVAL ID="1">
+        <PEER-ROOT>
+            /home/wang/Documents/Pycharm/DocumentSummarization/doc/systems/04systems_rouge
+        </PEER-ROOT>
+        <MODEL-ROOT>
+            /home/wang/Documents/Pycharm/DocumentSummarization/doc/model/04model_rouge
+        </MODEL-ROOT>
+        <INPUT-FORMAT TYPE="SEE">
+        </INPUT-FORMAT>
+        <PEERS>
+            <P ID="0">D30045.M.100.T.TT</P>
+        </PEERS>
+        <MODELS>
+            <M ID="B">D30045.M.100.T.B</M>
+            <M ID="C">D30045.M.100.T.C</M>
+            <M ID="E">D30045.M.100.T.E</M>
+            <M ID="F">D30045.M.100.T.F</M>
+        </MODELS>
+    </EVAL>
+    <EVAL ID="2">
+        <PEER-ROOT>
+            /home/wang/Documents/Pycharm/DocumentSummarization/doc/systems/04systems_rouge
+        </PEER-ROOT>
+        <MODEL-ROOT>
+            /home/wang/Documents/Pycharm/DocumentSummarization/doc/model/04model_rouge
+        </MODEL-ROOT>
+        <INPUT-FORMAT TYPE="SEE">
+        </INPUT-FORMAT>
+        <PEERS>
+            <P ID="1">firstway.txt</P>
+            <P ID="2">secondway.txt</P>
+        </PEERS>
+        <MODELS>
+            <M ID="B">D30044.M.100.T.B</M>
+            <M ID="C">D30044.M.100.T.C</M>
+            <M ID="D">D30044.M.100.T.D</M>
+            <M ID="G">D30044.M.100.T.G</M>
+        </MODELS>
+    </EVAL>
+</ROUGE-EVAL>

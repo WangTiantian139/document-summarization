@@ -3,3 +3,39 @@ The 'stop-word-list.csv' was downloaded from website http://xpo6.com/download-st
 The 'PorterStemming.py' was copied from website https://tartarus.org/martin/PorterStemmer/ mention by the slides on class
 
 
+Essential Files And Directoies Structure
+
+doc
+| model
+  | 04model
+    | The summary by human-being expert. 
+  | 04model_rouge 
+    | The summary by human-being expert converted into rouge format.
+| systems
+  | 04systems
+    | The result summary which summarized automatically.
+  | 04systems_rouge
+    | The result summary which summarized automatically and converted into rouge format.
+| unprocessed_data
+  | d30045t
+    | The unprocessed original documents being summarized.
+    
+ROUGE-RELEALE-1.5.5
+| rouge library (version 1.5.5) 
+| You can use this library to evaluate the result summary by the expert's ones.  
+| To run the evaluation, you can follow USE-ROUGE.md, where the relying libraries are
+| assumed to be installed previously.
+  
+document_summarization.py
+| Run document_summarization.py as main using python3 to summarize the interested data 
+| automatically. Two result files are output.
+| The first one, whose name is D30045.M.100.T.TT, is stored in doc/systems/04systems
+| Additionally, another one is in rouge format and stored in doc/systems/04systems_rouge 
+
+
+How To Use
+
+Run document_summarization.py as main, then you can use rouge to evaluate you result by
+following USE-ROUGE.md
+
+
