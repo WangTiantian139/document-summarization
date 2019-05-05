@@ -35,7 +35,6 @@ document_summarization.py
 
 How To Use
 
-Run document_summarization.py as main, then you can use rouge to evaluate you result by
-following USE-ROUGE.md
+Run document_summarization.py as main, then you can use rouge to evaluate your result following USE-ROUGE.md.
 
 
